@@ -1,0 +1,4 @@
+productId,nombre,precio,enStock,tags,fechaAlta,categoryId
+1a2b3c4d,Camisa Polo,25.50,true,"ropa,verano",2024-03-01T10:00:00Z,cat_ropa
+2b3c4d5e,Pantalón Jeans,45.00,true,"ropa,invierno",2024-03-02T11:00:00Z,cat_ropa
+3c4d5e6f,Zapatos Casuales,60.00,false,"zapatos,cuero",2024-03-03T12:00:00Z,cat_calzado
