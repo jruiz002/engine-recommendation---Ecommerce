@@ -1,1 +1,34 @@
-node_modules
+# Dependencias
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnp
+.pnp.js
+
+# Build y compilación (NestJS)
+dist/
+.nest/
+
+# Variables de Entorno (¡Muy importante que no se suban!)
+.env
+.env.test
+.env.production
+.env.local
+
+# Logs
+logs
+*.log
+
+# Coverage / Testing
+coverage/
+.nyc_output
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Postman collection (Opcional, si prefieres que no se suba, aunque puede ser útil. Lo dejo comentado por si quieres ignorarlo)
+# postman_collection.json
