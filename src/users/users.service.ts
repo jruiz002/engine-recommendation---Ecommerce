@@ -56,4 +56,44 @@ export class UsersService {
     });
     return result.records[0]?.get('u').properties;
   }
+
+  // Creación de relación con propiedades (entre 2 nodos ya existentes)
+  // Tipo de relación: COMPRÓ, con 3 propiedades
+  async createRelationCompro(data: {
+    userId: string;
+    productId: string;
+    cantidad: number;
+    precioFinal: number;
+    fechaCompra: string;
+  }) {
+    const query = `
+      MATCH (u:Usuario {userId: $userId})
+      MATCH (p:Producto {productId: $productId})
+      CREATE (u)-[r:COMPRÓ {
+        cantidad: $cantidad,
+        precioFinal: $precioFinal,
+        fechaCompra: datetime($fechaCompra)
+      }]->(p)
+      RETURN type(r) AS tipoRelacion, r.cantidad AS cantidad, r.precioFinal AS precioFinal, r.fechaCompra AS fechaCompra
+    `;
+    const result = await this.neo4jService.write(query, {
+      userId: data.userId,
+      productId: data.productId,
+      cantidad: data.cantidad,
+      precioFinal: data.precioFinal,
+      fechaCompra: data.fechaCompra,
+    });
+    
+    if (result.records.length === 0) {
+      throw new Error('No se pudo crear la relación. Verifica que el Usuario y el Producto existan.');
+    }
+    
+    const record = result.records[0];
+    return {
+      tipoRelacion: record.get('tipoRelacion'),
+      cantidad: record.get('cantidad'),
+      precioFinal: record.get('precioFinal'),
+      fechaCompra: record.get('fechaCompra')
+    };
+  }
 }

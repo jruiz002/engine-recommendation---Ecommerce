@@ -41,4 +41,22 @@ export class UsersController {
       data: result,
     };
   }
+
+  @Post('relation-compro')
+  async createRelationCompro(
+    @Body()
+    body: {
+      userId: string;
+      productId: string;
+      cantidad: number;
+      precioFinal: number;
+      fechaCompra: string;
+    },
+  ) {
+    const result = await this.usersService.createRelationCompro(body);
+    return {
+      message: 'Relación COMPRÓ creada exitosamente con 3 propiedades',
+      data: result,
+    };
+  }
 }
