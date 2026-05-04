@@ -31,6 +31,24 @@
 $ npm install
 ```
 
+## Populate database with seed data
+
+Before running the application, populate your Neo4j/Aura DB with initial data:
+
+```bash
+$ npx ts-node seed.ts
+```
+
+This will create:
+- 50 Categoría nodes
+- 1000 Producto nodes
+- 1000 Usuario nodes
+- 1500 Orden nodes
+- 1450 Reseña nodes
+- All relationships (PERTENECE_A, COMPRÓ, VISTO, REALIZÓ, CONTIENE, SOBRE, CALIFICÓ, SIMILAR_A, RECOMENDADO_PARA, SUBCATEGORÍA_DE)
+
+**Note:** Ensure your `.env` file has valid Neo4j/Aura credentials before running the seed.
+
 ## Compile and run the project
 
 ```bash
