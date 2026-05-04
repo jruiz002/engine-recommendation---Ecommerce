@@ -96,4 +96,67 @@ export class UsersService {
       fechaCompra: record.get('fechaCompra')
     };
   }
+
+  // =============================
+  // GESTIÓN DE PROPIEDADES EN RELACIONES (COMPRÓ)
+  // =============================
+
+  // 1. Agregar 1 o más propiedades a una relación entre 2 nodos
+  async addPropertiesToRelation(userId: string, productId: string, properties: Record<string, any>) {
+    const query = `
+      MATCH (u:Usuario {userId: $userId})-[r:COMPRÓ]->(p:Producto {productId: $productId})
+      SET r += $properties
+      RETURN r
+    `;
+    const result = await this.neo4jService.write(query, { userId, productId, properties });
+    return result.records[0]?.get('r').properties;
+  }
+
+  // 2. Agregar 1 o más propiedades a múltiples relaciones al mismo tiempo
+  // pairs: [{ userId, productId }, ...]
+  async addPropertiesToManyRelations(pairs: Array<{ userId: string; productId: string }>, properties: Record<string, any>) {
+    const query = `
+      UNWIND $pairs AS pair
+      MATCH (u:Usuario {userId: pair.userId})-[r:COMPRÓ]->(p:Producto {productId: pair.productId})
+      SET r += $properties
+      RETURN count(r) AS updatedCount
+    `;
+    const result = await this.neo4jService.write(query, { pairs, properties });
+    return { count: result.records[0]?.get('updatedCount').toNumber() };
+  }
+
+  // 3. Actualizar 1 o más propiedades de una relación (igual que add usando SET)
+  async updatePropertiesToRelation(userId: string, productId: string, properties: Record<string, any>) {
+    return this.addPropertiesToRelation(userId, productId, properties);
+  }
+
+  // 4. Actualizar 1 o más propiedades de múltiples relaciones al mismo tiempo
+  async updatePropertiesToManyRelations(pairs: Array<{ userId: string; productId: string }>, properties: Record<string, any>) {
+    return this.addPropertiesToManyRelations(pairs, properties);
+  }
+
+  // 5. Eliminar 1 o más propiedades de una relación
+  async removePropertiesFromRelation(userId: string, productId: string, propertyKeys: string[]) {
+    const removeQuery = propertyKeys.map(k => `r.${k} = null`).join(', ');
+    const query = `
+      MATCH (u:Usuario {userId: $userId})-[r:COMPRÓ]->(p:Producto {productId: $productId})
+      SET ${removeQuery}
+      RETURN r
+    `;
+    const result = await this.neo4jService.write(query, { userId, productId });
+    return result.records[0]?.get('r').properties;
+  }
+
+  // 6. Eliminar 1 o más propiedades de múltiples relaciones al mismo tiempo
+  async removePropertiesFromManyRelations(pairs: Array<{ userId: string; productId: string }>, propertyKeys: string[]) {
+    const removeQuery = propertyKeys.map(k => `r.${k} = null`).join(', ');
+    const query = `
+      UNWIND $pairs AS pair
+      MATCH (u:Usuario {userId: pair.userId})-[r:COMPRÓ]->(p:Producto {productId: pair.productId})
+      SET ${removeQuery}
+      RETURN count(r) AS updatedCount
+    `;
+    const result = await this.neo4jService.write(query, { pairs });
+    return { count: result.records[0]?.get('updatedCount').toNumber() };
+  }
 }

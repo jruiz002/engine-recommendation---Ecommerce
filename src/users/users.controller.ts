@@ -59,4 +59,58 @@ export class UsersController {
       data: result,
     };
   }
+
+  @Post('relation/add-props')
+  async addPropertiesToRelation(
+    @Body()
+    body: { userId: string; productId: string; properties: Record<string, any> },
+  ) {
+    const result = await this.usersService.addPropertiesToRelation(body.userId, body.productId, body.properties);
+    return { message: 'Propiedades agregadas a la relación', data: result };
+  }
+
+  @Post('relation/add-props-many')
+  async addPropertiesToManyRelations(
+    @Body()
+    body: { pairs: Array<{ userId: string; productId: string }>; properties: Record<string, any> },
+  ) {
+    const result = await this.usersService.addPropertiesToManyRelations(body.pairs, body.properties);
+    return { message: 'Propiedades agregadas a relaciones (bulk)', data: result };
+  }
+
+  @Post('relation/update-props')
+  async updatePropertiesToRelation(
+    @Body()
+    body: { userId: string; productId: string; properties: Record<string, any> },
+  ) {
+    const result = await this.usersService.updatePropertiesToRelation(body.userId, body.productId, body.properties);
+    return { message: 'Propiedades actualizadas en la relación', data: result };
+  }
+
+  @Post('relation/update-props-many')
+  async updatePropertiesToManyRelations(
+    @Body()
+    body: { pairs: Array<{ userId: string; productId: string }>; properties: Record<string, any> },
+  ) {
+    const result = await this.usersService.updatePropertiesToManyRelations(body.pairs, body.properties);
+    return { message: 'Propiedades actualizadas en relaciones (bulk)', data: result };
+  }
+
+  @Post('relation/remove-props')
+  async removePropertiesFromRelation(
+    @Body()
+    body: { userId: string; productId: string; propertyKeys: string[] },
+  ) {
+    const result = await this.usersService.removePropertiesFromRelation(body.userId, body.productId, body.propertyKeys);
+    return { message: 'Propiedades eliminadas de la relación', data: result };
+  }
+
+  @Post('relation/remove-props-many')
+  async removePropertiesFromManyRelations(
+    @Body()
+    body: { pairs: Array<{ userId: string; productId: string }>; propertyKeys: string[] },
+  ) {
+    const result = await this.usersService.removePropertiesFromManyRelations(body.pairs, body.propertyKeys);
+    return { message: 'Propiedades eliminadas de relaciones (bulk)', data: result };
+  }
 }

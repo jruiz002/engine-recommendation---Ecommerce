@@ -1,9 +1,9 @@
 import * as neo4j from 'neo4j-driver';
 import { faker } from '@faker-js/faker';
 
-const URI = 'neo4j+s://2db88b14.databases.neo4j.io';
-const USER = '2db88b14';
-const PASSWORD = 'jE951Z6kRXceaWc0nlUQAyQMV2jAPS6gtwB6-diMKwo';
+const URI = 'neo4j+s://da347f2c.databases.neo4j.io';
+const USER = 'da347f2c';
+const PASSWORD = 'xRKzOHdDvYDy7EhcujR4t55814buNbyCNfUvOrqx_nI';
 
 const driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD));
 
