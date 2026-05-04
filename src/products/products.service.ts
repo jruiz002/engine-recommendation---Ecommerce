@@ -112,4 +112,33 @@ export class ProductsService {
     const result = await this.neo4jService.write(query, { productIds });
     return { count: result.records[0]?.get('updatedCount').toNumber() };
   }
+
+  // =============================
+  // ELIMINACIÓN DE NODOS (Producto)
+  // =============================
+
+  // Eliminar 1 nodo Producto (y sus relaciones) usando DETACH DELETE
+  async deleteOne(productId: string) {
+    const query = `
+      MATCH (p:Producto {productId: $productId})
+      WITH collect(p) AS nodes, size(collect(p)) AS deletedCount
+      FOREACH (n IN nodes | DETACH DELETE n)
+      RETURN deletedCount
+    `;
+    const result = await this.neo4jService.write(query, { productId });
+    return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
+  }
+
+  // Eliminar múltiples nodos Producto por lista de productIds
+  async deleteMany(productIds: string[]) {
+    const query = `
+      UNWIND $productIds AS id
+      MATCH (p:Producto {productId: id})
+      WITH collect(p) AS nodes, size(collect(p)) AS deletedCount
+      FOREACH (n IN nodes | DETACH DELETE n)
+      RETURN deletedCount
+    `;
+    const result = await this.neo4jService.write(query, { productIds });
+    return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
+  }
 }

@@ -70,4 +70,22 @@ export class ProductsController {
     const data = await this.productsService.removePropertiesFromOne(id, body.keys);
     return { message: 'Propiedades eliminadas del nodo exitosamente', data };
   }
+
+  // =============================
+  // ELIMINACIÓN DE NODOS
+  // =============================
+
+  // Eliminar múltiples nodos Producto (DEBE ir ANTES de :id para evitar conflicto de rutas)
+  @Delete('bulk')
+  async deleteMany(@Body() body: { productIds: string[] }) {
+    const result = await this.productsService.deleteMany(body.productIds);
+    return { message: `Eliminados ${result.deletedCount} nodos`, data: result };
+  }
+
+  // Eliminar 1 nodo Producto (y sus relaciones)
+  @Delete(':id')
+  async deleteOne(@Param('id') id: string) {
+    const result = await this.productsService.deleteOne(id);
+    return { message: `Nodo ${id} eliminado`, data: result };
+  }
 }
