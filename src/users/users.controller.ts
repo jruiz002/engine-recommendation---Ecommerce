@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -112,5 +112,17 @@ export class UsersController {
   ) {
     const result = await this.usersService.removePropertiesFromManyRelations(body.pairs, body.propertyKeys);
     return { message: 'Propiedades eliminadas de relaciones (bulk)', data: result };
+  }
+
+  @Delete('relation')
+  async deleteRelation(@Body() body: { userId: string; productId: string }) {
+    const result = await this.usersService.deleteRelation(body.userId, body.productId);
+    return { message: 'Relación eliminada', data: result };
+  }
+
+  @Delete('relation/bulk')
+  async deleteManyRelations(@Body() body: { pairs: Array<{ userId: string; productId: string }> }) {
+    const result = await this.usersService.deleteManyRelations(body.pairs);
+    return { message: 'Relaciones eliminadas (bulk)', data: result };
   }
 }

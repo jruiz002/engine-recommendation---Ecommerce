@@ -159,4 +159,35 @@ export class UsersService {
     const result = await this.neo4jService.write(query, { pairs });
     return { count: result.records[0]?.get('updatedCount').toNumber() };
   }
+
+  // =============================
+  // ELIMINACIÓN DE RELACIONES (COMPRÓ)
+  // =============================
+
+  // Eliminar 1 relación COMPRÓ entre un Usuario y un Producto
+  async deleteRelation(userId: string, productId: string) {
+    const query = `
+      MATCH (u:Usuario {userId: $userId})-[r:COMPRÓ]->(p:Producto {productId: $productId})
+      WITH collect(r) AS rels
+      WITH rels, size(rels) AS deletedCount
+      FOREACH (x IN rels | DELETE x)
+      RETURN deletedCount
+    `;
+    const result = await this.neo4jService.write(query, { userId, productId });
+    return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
+  }
+
+  // Eliminar múltiples relaciones COMPRÓ por pares (bulk)
+  async deleteManyRelations(pairs: Array<{ userId: string; productId: string }>) {
+    const query = `
+      UNWIND $pairs AS pair
+      MATCH (u:Usuario {userId: pair.userId})-[r:COMPRÓ]->(p:Producto {productId: pair.productId})
+      WITH collect(r) AS rels
+      WITH rels, size(rels) AS deletedCount
+      FOREACH (x IN rels | DELETE x)
+      RETURN deletedCount
+    `;
+    const result = await this.neo4jService.write(query, { pairs });
+    return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
+  }
 }
