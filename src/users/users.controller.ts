@@ -126,22 +126,8 @@ export class UsersController {
     return { message: 'Relaciones eliminadas (bulk)', data: result };
   }
 
-  // ========================================
   // ALGORITMO DATA SCIENCE: Recomendaciones con Jaccard
-  // ========================================
   /**
-   * GET /users/:id/recommendations
-   * 
-   * Retorna Top 5 productos recomendados para un usuario específico
-   * basado en similitud de intereses (Índice de Jaccard) con otros usuarios
-   * que han realizado compras similares.
-   * 
-   * El algoritmo analiza:
-   * - Usuarios con intereses en común
-   * - Productos que compraron esos usuarios
-   * - Calcula similitud Jaccard: |Intersección| / |Unión| de intereses
-   * - Retorna productos ordenados por score de similitud
-   * 
    * @param id ID del usuario
    * @returns Recomendaciones personalizadas con scores matemáticos
    */

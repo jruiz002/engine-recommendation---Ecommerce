@@ -191,19 +191,9 @@ export class UsersService {
     return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
   }
 
-  // ========================================
   // ALGORITMO DATA SCIENCE: Jaccard Index
-  // ========================================
   /**
    * Obtiene recomendaciones personalizadas usando Índice de Jaccard
-   * 
-   * Algoritmo:
-   * 1. Obtiene el usuario base y sus intereses
-   * 2. Busca otros usuarios con intereses en común
-   * 3. Identifica productos que compraron pero el usuario base NO ha comprado
-   * 4. Calcula similitud Jaccard: |Intersección| / |Unión| de intereses
-   * 5. Retorna Top 5 productos ordenados por score
-   * 
    * @param userId ID del usuario para el cual generar recomendaciones
    * @returns Array de recomendaciones con scores Jaccard
    */
