@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Get, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -124,5 +124,44 @@ export class UsersController {
   async deleteManyRelations(@Body() body: { pairs: Array<{ userId: string; productId: string }> }) {
     const result = await this.usersService.deleteManyRelations(body.pairs);
     return { message: 'Relaciones eliminadas (bulk)', data: result };
+  }
+
+  // ========================================
+  // ALGORITMO DATA SCIENCE: Recomendaciones con Jaccard
+  // ========================================
+  /**
+   * GET /users/:id/recommendations
+   * 
+   * Retorna Top 5 productos recomendados para un usuario específico
+   * basado en similitud de intereses (Índice de Jaccard) con otros usuarios
+   * que han realizado compras similares.
+   * 
+   * El algoritmo analiza:
+   * - Usuarios con intereses en común
+   * - Productos que compraron esos usuarios
+   * - Calcula similitud Jaccard: |Intersección| / |Unión| de intereses
+   * - Retorna productos ordenados por score de similitud
+   * 
+   * @param id ID del usuario
+   * @returns Recomendaciones personalizadas con scores matemáticos
+   */
+  @Get(':id/recommendations')
+  async getRecommendationsForUser(@Param('id') userId: string) {
+    try {
+      const data = await this.usersService.getRecommendationsForUser(userId);
+      
+      return {
+        statusCode: 200,
+        message: 'Recomendaciones generadas exitosamente usando algoritmo Jaccard Index',
+        data
+      };
+    } catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+  return {
+    statusCode: 400,
+    message: errorMessage,
+    data: null
+  };
+}
   }
 }

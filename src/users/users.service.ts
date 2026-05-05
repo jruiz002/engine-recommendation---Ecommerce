@@ -190,4 +190,101 @@ export class UsersService {
     const result = await this.neo4jService.write(query, { pairs });
     return { deletedCount: result.records[0]?.get('deletedCount').toNumber() };
   }
+
+  // ========================================
+  // ALGORITMO DATA SCIENCE: Jaccard Index
+  // ========================================
+  /**
+   * Obtiene recomendaciones personalizadas usando Índice de Jaccard
+   * 
+   * Algoritmo:
+   * 1. Obtiene el usuario base y sus intereses
+   * 2. Busca otros usuarios con intereses en común
+   * 3. Identifica productos que compraron pero el usuario base NO ha comprado
+   * 4. Calcula similitud Jaccard: |Intersección| / |Unión| de intereses
+   * 5. Retorna Top 5 productos ordenados por score
+   * 
+   * @param userId ID del usuario para el cual generar recomendaciones
+   * @returns Array de recomendaciones con scores Jaccard
+   */
+  async getRecommendationsForUser(userId: string) {
+    const query = `
+  // PASO 1: Obtener usuario base y sus intereses
+  MATCH (u1:Usuario {userId: $userId})
+  WHERE u1.intereses IS NOT NULL
+  
+  // PASO 2: Encontrar otros usuarios que compraron productos
+  MATCH (u2:Usuario)-[:COMPRÓ]->(p:Producto)
+  WHERE u1 <> u2 
+    AND u2.intereses IS NOT NULL 
+    AND NOT (u1)-[:COMPRÓ]->(p)
+  
+  // PASO 3: Calcular intereses en común
+  WITH u1, u2, p, [interes IN u1.intereses WHERE interes IN u2.intereses] AS interesesComunes
+  
+  // PASO 4: Calcular Jaccard individual
+  WITH p, interesesComunes,
+       size(interesesComunes) AS intersectionSize,
+       (size(u1.intereses) + size(u2.intereses) - size(interesesComunes)) AS unionSize
+  
+  // PASO 5: Filtrar resultados con score significativo
+  WHERE unionSize > 0 AND intersectionSize > 0
+  
+  // PASO 6: Calcular score Jaccard
+  WITH p, toFloat(intersectionSize) / toFloat(unionSize) AS jaccardScore, interesesComunes
+  
+  // PASO 7: Agrupar y promediar scores
+  WITH p, COLLECT(jaccardScore) AS scores, COLLECT(DISTINCT interesesComunes) AS interesesComunesLista
+  
+  // PASO 8: Desempaquetar lista y calcular promedio
+  UNWIND scores AS score
+  WITH p, avg(score) AS avgScore, interesesComunesLista[0] AS interesesComunes
+  
+  // PASO 9: Retornar Top 5
+  RETURN {
+    productId: p.productId,
+    nombre: p.nombre,
+    precio: p.precio,
+    enStock: p.enStock,
+    tags: p.tags,
+    jaccardScore: ROUND(avgScore * 100) / 100,
+    interesesComunes: interesesComunes,
+    razon: "Usuarios con intereses similares compraron este producto"
+  } AS recomendacion
+  
+  ORDER BY avgScore DESC
+  LIMIT 5
+`;
+
+    try {
+      const result = await this.neo4jService.read(query, { userId });
+
+      // Validar que existan recomendaciones
+      if (!result.records || result.records.length === 0) {
+        return {
+          userId,
+          recomendaciones: [],
+          mensaje: "No se encontraron recomendaciones personalizadas en este momento",
+          algoritmo: "User-Based Content Filtering (Jaccard Index)"
+        };
+      }
+
+      // Mapear resultados
+      const recomendaciones = result.records.map((record) => 
+        record.get('recomendacion')
+      );
+
+      return {
+        userId,
+        totalRecomendaciones: recomendaciones.length,
+        algoritmo: "User-Based Content Filtering (Jaccard Index)",
+        recomendaciones
+      };
+
+    } catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  console.error('Error en getRecommendationsForUser:', error);
+  throw new Error(`Error al calcular recomendaciones: ${errorMessage}`);
+}
+  }
 }
